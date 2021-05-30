@@ -1,0 +1,27 @@
+<beans 	xmlns="http://www.springframework.org/schema/beans"
+          xmlns:context="http://www.springframework.org/schema/context"
+          xmlns:mvc="http://www.springframework.org/schema/mvc"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.springframework.org/schema/beans
+							http://www.springframework.org/schema/beans/spring-beans.xsd
+							http://www.springframework.org/schema/context
+							http://www.springframework.org/schema/context/spring-context.xsd
+							http://www.springframework.org/schema/mvc
+							http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!--第一步 扫描类-->
+    <!-- 告知springmvc  哪些包中 存在 被注解的类 -->
+    <context:component-scan base-package="com.banyuan.study.controller"/>
+
+    <!--第二步 拿到扫描到的类, 抽取方法和路径,形成一一对象关系-->
+    <!-- 注册注解开发驱动 -->
+    <mvc:annotation-driven>
+    </mvc:annotation-driven>
+
+    <!--第三步 配置视图解析器 : 解析方法运行完之后的返回值-->
+    <!--配置视图解析器 : 解析方法运行完之后的返回值-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+</beans>
