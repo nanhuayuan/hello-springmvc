@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!--MyBatis配置-->
+<!-- 根标签 -->
+<configuration>
+    <!--添加properties配置文件路径(外部配置、动态替换)-->
+    <properties resource="jdbc.properties" />
+    <settings>
+        <setting name="cacheEnabled" value="true"/> <!-- mybaits-config.xml中开启全局缓存（默认开启） -->
+    </settings>
+    <typeAliases>
+        <!--定义类的别名-->
+        <typeAlias type="com.banyuan.study.bean.User" alias="user" />
+        <typeAlias type="com.banyuan.study.bean.Product" alias="product" />
+        <typeAlias type="com.banyuan.study.bean.Order" alias="order" />
+        <typeAlias type="com.banyuan.study.bean.Manager" alias="manager" />
+        <typeAlias type="com.banyuan.study.bean.Passenger" alias="passenger" />
+        <typeAlias type="com.banyuan.study.bean.Passport" alias="passport" />
+        <typeAlias type="com.banyuan.study.bean.Employee" alias="employee" />
+        <typeAlias type="com.banyuan.study.bean.Department" alias="department" />
+        <typeAlias type="com.banyuan.study.bean.Student" alias="student" />
+        <typeAlias type="com.banyuan.study.bean.Subject" alias="subject" />
+        <!--自动扫描包，将原类名作为别名-->
+        <package name="com.banyuan.study.dao" />
+    </typeAliases>
+
+    <plugins>
+        <!-- com.github.pagehelper为PageHelper类所在包名 -->
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <!-- 使用下面的方式配置参数，后面会有所有的参数介绍 -->
+            <!--<property name="param1" value="value1"/>-->
+            <!--指定分页插件使用哪种方言.分页插件会自动检测当前的数据库链接，自动选择合适的分页方式。 -->
+            <property name="helperDialect" value="mysql"/>
+            <!--分页合理化参数，默认值为false。
+            当该参数设置为 true 时，pageNum<=0 时会查询第一页，
+            pageNum>pages（超过总数时），会查询最后一页。
+            默认false 时，直接根据参数进行查询。-->
+            <!--<property name="reasonable" value="true"/>-->
+        </plugin>
+    </plugins>
+    <!--JDBC环境配置、选中默认环境-->
+    <!-- 核心配置 -->
+    <environments default="MySqlDB">
+        <!--MySql数据库环境配置-->
+        <environment id="MySqlDB">
+            <!--事务管理-->
+            <transactionManager type="JDBC"/>
+            <!--连接池-->
+            <!-- 数据库源,如果使用自带的数据库源,那么以下四个必须要配齐.如果缺了驱动,那么就会报空指针异常,因为找不到需要的驱动.如果德鲁伊,那驱动不需要配 -->
+<!--
+            <dataSource type="org.apache.ibatis.datasource.pooled.PooledDataSourceFactory">
+-->
+            <dataSource type="com.banyuan.study.config.MyDruidDataSourceFactory">
+                <property name="driverClass" value="${jdbc.driver}"/>
+                <!-- 地址 -->
+                <property name="jdbcUrl" value="${jdbc.url}"/>
+                <!-- 用户名 -->
+                <property name="username" value="${jdbc.username}"/>
+                <!-- 密码 -->
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+
+    <!--Mapper注册-->
+    <mappers>
+        <!--注册Mapper文件的所在位置-->
+        <mapper resource="mapper/UserMapper.xml"/>
+        <mapper resource="mapper/ProductMapper.xml"/>
+        <mapper resource="mapper/OrderMapper.xml"/>
+        <mapper resource="mapper/ManagerMapper.xml"/>
+        <mapper resource="mapper/PassengerMapper.xml"/>
+        <mapper resource="mapper/DepartmentMapper.xml"/>
+        <mapper resource="mapper/StudentMapper.xml"/>
+    </mappers>
+    <!--定义别名二选一-->
+
+</configuration>

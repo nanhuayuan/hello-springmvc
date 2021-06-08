@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.banyuan.study.dao.ManagerDao">
+    <select id="selectManagerByIdAndPwd" resultType="manager">
+        SELECT mgr_id AS id , mgr_name AS username , mgr_pwd AS password
+        FROM t_managers
+        WHERE mgr_id = #{id} AND mgr_pwd = #{password}
+    </select>
+
+    <!--定义resultMap标签-->
+    <resultMap id="managerResultMap" type="manager">
+        <!--关联主键与列名-->
+        <id property="id" column="mgr_id" />
+
+        <!--关联属性与列名-->
+        <result property="name" column="mgr_name" />
+        <result property="password" column="mgr_pwd" />
+    </resultMap>
+
+    <!--使用resultMap作为ORM映射依据-->
+    <select id="selectAllManagers" resultMap="managerResultMap">
+        SELECT mgr_id , mgr_name , mgr_pwd
+        FROM t_managers
+    </select>
+</mapper>

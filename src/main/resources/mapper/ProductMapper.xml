@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.banyuan.study.dao.ProductDao">
+    <insert id="insertProduct" parameterType="product">
+        <selectKey keyProperty="id" resultType="int" order="AFTER"> <!-- 插入之后 -->
+            SELECT LAST_INSERT_ID() <!-- 适用于整数类型自增主键 -->
+        </selectKey>
+
+        INSERT INTO t_product(id,name) VALUES(#{id},#{name})
+    </insert>
+</mapper>

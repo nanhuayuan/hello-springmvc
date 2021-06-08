@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.banyuan.study.dao.DepartmentDao">
+    <!-- 封装规则 -->
+    <resultMap id="departmentResultMap" type="department">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="location" column="location" />
+
+        <!-- 关系表中数据的封装规则 -->		<!-- 指定关系表的实体类型 -->
+        <collection property="emps" ofType="employee">
+            <id property="id" column="emp_id" />
+            <result property="name" column="emp_name" />
+            <result property="salary" column="salary" />
+            <result property="deptId" column="dept_id" />
+        </collection>
+    </resultMap>
+
+    <!-- 多表连接查询 -->			      <!-- 封装规则 -->
+    <select id="selectDepartmentById" resultMap="departmentResultMap" >
+        <!-- 别名（避免与d.id、d.name冲突）-->
+        SELECT d.id , d.name , d.location , e.id AS emp_id , e.name emp_name , e.salary , e.dept_id
+        FROM t_department d LEFT JOIN t_employees e
+        ON d.id = e.dept_id
+        WHERE d.id = #{id}
+    </select>
+</mapper>

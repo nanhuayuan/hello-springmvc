@@ -9,12 +9,28 @@
 							http://www.springframework.org/schema/mvc
 							http://www.springframework.org/schema/mvc/spring-mvc.xsd">
     <!--第一步 扫描类-->
-    <!-- 告知springmvc  哪些包中 存在 被注解的类 -->
-    <context:component-scan base-package="com.banyuan.study.controller"/>
+    <!-- 告知SpringMVC  哪些包中 存在 被注解的类
+	use-default-filters=true 凡是被 @Controller @Service  @Repository注解的类，都会被扫描
+	use-default-filters=false 默认不扫描包内的任何类, 只扫描include-filter中指定的类
+	只扫描被@Controller注解的类
+-->
+    <context:component-scan base-package="com.banyuan.study.controller" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
 
     <!--第二步 拿到扫描到的类, 抽取方法和路径,形成一一对象关系-->
     <!-- 注册注解开发驱动 -->
     <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <!-- 声明转换类型:json -->
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
     </mvc:annotation-driven>
 
     <!--第三步 配置视图解析器 : 解析方法运行完之后的返回值-->
@@ -24,4 +40,25 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 
+    <mvc:resources mapping="/file/**" location="/file/" />
+
+    <!-- 声明异常解析器 -->
+    <bean class="com.banyuan.study.handler.MyExResolver"></bean>
+
+    <!--配置拦截范围-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="com.banyuan.study.interceptor.MyInter1"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- 上传解析器
+	     id必须是：“multipartResolver”
+ -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 最大可上传的文件大小  单位：byte  超出后会抛出MaxUploadSizeExceededException异常，可以异常解析器捕获 -->
+        <property name="maxUploadSize" value="1048576"></property>
+    </bean>
 </beans>

@@ -17,5 +17,11 @@
     ${sessionScope.user.id} <br>
     ${requestScope.age}<br>
     ${requestScope.name}<br>
+    <br>
+    <form action="../file/upload" method="post"
+          enctype="multipart/form-data">
+        file: <input type="file" name="source"/> <br>
+        <input type="submit" value="提交"/>
+    </form>
 </body>
 </html>

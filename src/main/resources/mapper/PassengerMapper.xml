@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.banyuan.study.dao.PassengerDao">
+    <!-- 结果映射（查询结果的封装规则） -->
+    <resultMap id="passengerResultMap" type="passenger">
+        <id property="id" column="id"/>
+        <result property="name" column="name" />
+        <result property="sex" column="sex" />
+        <result property="birthday" column="birthday" />
+
+        <!-- 关系表中数据的封装规则 -->	 <!-- 指定关系表的实体类型 -->
+        <association property="passport" javaType="passport">
+            <id property="id" column="passport_id" />
+            <result property="nationality" column="nationality" />
+            <result property="expire" column="expire" />
+            <result property="passengerId" column="passenger_id" />
+        </association>
+    </resultMap>
+
+    <!-- 多表连接查询 -->					  	<!-- 结果映射（查询结果的封装规则）-->
+    <select id="selectPassengerById" resultMap="passengerResultMap">
+        <!-- 别名（避免与p1.id冲突） -->
+        SELECT p1.id , p1.name , p1.sex , p1.birthday , p2.id as passport_id , p2.nationality , p2.expire 			, p2.passenger_id
+        FROM t_passengers p1 LEFT JOIN t_passports p2
+        ON p1.id = p2.passenger_id
+        WHERE p1.id = #{id}
+    </select>
+</mapper>

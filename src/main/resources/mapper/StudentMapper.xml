@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.banyuan.study.dao.StudentDao">
+    <!-- 映射查询只封装两表中的信息，可忽略关系表内容 -->
+    <resultMap id="allMap" type="student">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="sex" column="sex" />
+        <collection property="subjects" ofType="subject">
+            <id property="id" column="sid" />
+            <result property="name" column="sname" />
+            <result property="grade" column="grade" />
+        </collection>
+    </resultMap>
+
+    <!-- 三表连接查询 -->
+    <select id="selectAllStudents" resultMap="allMap">
+        SELECT s1.* , ss.* , s2.id as sid , s2.name as sname , s2.grade
+        FROM t_student s1 LEFT JOIN t_stu_sub ss
+        ON s1.id = ss.student_id <!-- 通过t_stu_sub表建立二者之间的关系 -->
+        LEFT JOIN t_subject s2
+        ON ss.subject_id = s2.id
+    </select>
+</mapper>

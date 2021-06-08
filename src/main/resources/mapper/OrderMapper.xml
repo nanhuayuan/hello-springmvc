@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.banyuan.study.dao.OrderDao">
+    <insert id="insertOrder" parameterType="order">
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE"><!-- 插入之前 -->
+            SELECT REPLACE(UUID(),'-','') <!-- 适用于字符类型主键 -->
+        </selectKey>
+
+        INSERT INTO t_order(id,name) VALUES(#{id},#{name})
+    </insert>
+</mapper>

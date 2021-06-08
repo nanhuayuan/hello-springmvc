@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.banyuan.study.dao.UserDao">
+    <cache /><!-- 指定缓存 -->
+    <!--id = 所需重写的接口抽象方法，resultType = 查询后所需返回的对象类型-->
+    <select id="selectUserById" resultType="user" >
+        <!--#{arg0} = 方法的第一个形参-->
+        SELECT * FROM t_users WHERE id = #{arg0}
+    </select>
+
+    <!--<select id="selectUserByIdAndPwd" resultType="user">
+        SELECT * FROM t_users
+        WHERE id = #{arg0} AND password = #{arg1} &lt;!&ndash;arg0 arg1 arg2 ...&ndash;&gt;
+    </select>-->
+
+    <select id="selectUserByIdAndPwd" resultType="user">
+        SELECT * FROM t_users
+        WHERE id = #{param1} AND password = #{param2} <!--param1 param2 param3 ...-->
+    </select>
+
+    <select id="selectUserByIdAndPwd3" resultType="user">
+        SELECT * FROM t_users
+        WHERE id = #{id} AND password = #{pwd} <!-- 使用注解值 @Param("pwd") -->
+    </select>
+
+    <select id="selectUserByIdAndPwd4" resultType="user">
+        SELECT * FROM t_users
+        WHERE id = #{myId} AND password = #{myPwd} <!-- 通过key获得value -->
+    </select>
+
+    <select id="selectUserByUserInfo" resultType="user">
+        SELECT * FROM t_users
+        WHERE id = #{id} AND password = #{password} <!-- #{id}取User对象的id属性值、#{password}同理 -->
+    </select>
+
+    <select id="selectUsersByKeyword" resultType="user">
+        SELECT * FROM t_users
+        WHERE name LIKE concat('%',#{keyword},'%') <!-- 拼接'%' -->
+    </select>
+
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM t_users
+        WHERE id = #{id} <!--只有一个参数时，#{任意书写}-->
+    </delete>
+
+    <update id="updateUser" parameterType="user">
+        UPDATE t_users SET name=#{name}, password=#{password}, sex=#{sex}, birthday=#{birthday}
+        WHERE id = #{id} <!--方法参数为对象时，可直接使用#{属性名}进行获取-->
+    </update>
+
+    <sql id="baseSql"> <!-- 定义SQL片段 -->
+        SELECT id,name,password,sex,birthday
+    </sql>
+
+    <select id="selectUserByCondition" resultType="user">
+        <include refid="baseSql" /> <!-- 通过ID引用SQL片段 -->
+        FROM t_users
+    </select>
+
+    <select id="selectUserByNameAndSex" resultType="user">
+        <include refid="baseSql"/> <!-- 通过ID引用SQL片段 -->
+        FROM t_users
+        WHERE
+        sex=#{sex}
+        <if test="name!=null">
+            and name=#{name}
+        </if>
+    </select>
+
+    <select id="selectUserByNameAndSex2" resultType="user">
+        <include refid="baseSql"/> <!-- 通过ID引用SQL片段 -->
+        FROM t_users
+        <where>
+            <if test="sex != null"> <!-- WHERE，会自动忽略前后缀（如：and | or） -->
+                sex = #{sex}
+            </if>
+
+            <if test="name != null">
+                and name = #{name}
+            </if>
+
+        </where>
+    </select>
+
+
+    <update id="updateUserById">
+        UPDATE t_users
+        <set>
+            <if test="name != null"><!-- where子句中满足条件的if，会自动忽略后缀（如：,） -->
+                name = #{name} ,
+            </if>
+
+            <if test="sex != null">
+                sex = #{sex} ,
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectUserbySexAndName3" resultType="user">
+        <include refid="baseSql"/> <!-- 通过ID引用SQL片段 -->
+        FROM t_users
+        <trim prefix="WHERE" prefixOverrides="AND|OR"> <!-- 增加WHERE前缀，自动忽略前缀 -->
+            <if test="sex != null"> <!-- WHERE，会自动忽略前后缀（如：and | or） -->
+                AND sex = #{sex}
+            </if>
+            <if test="name != null">
+                AND name = #{name}
+            </if>
+        </trim>
+    </select>
+
+
+    <update id="updateUserById2">
+        UPDATE t_users
+        <trim prefix="SET" suffixOverrides=","> <!-- 增加SET前缀，自动忽略后缀 -->
+            <if test="name != null">
+                name = #{name} ,
+            </if>
+
+            <if test="sex != null">
+                sex = #{sex} ,
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectUserByIds" resultType="user">
+        <include refid="baseSql"/> <!-- 通过ID引用SQL片段 -->
+        FROM t_users
+        WHERE id IN
+        <foreach collection="list" open="(" separator="," close=")"  item="id" index="i">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

@@ -2,12 +2,19 @@ package com.banyuan.study.controller;
 
 import com.banyuan.study.bean.User;
 import com.banyuan.study.bean.UserList;
+import com.banyuan.study.service.UserService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import sun.rmi.runtime.NewThreadAction;
 
+import javax.lang.model.element.VariableElement;
 import java.util.Date;
 
 /**
@@ -17,6 +24,7 @@ import java.util.Date;
  */
 @Controller
 public class UserController {
+    private UserService userService = new UserService();
 
     //导包 : aop bean core context exp web webmvc logging
     //在web.xml中配置 中央控制器 DispatcherServlet 配置路径为 /
@@ -82,5 +90,19 @@ public class UserController {
     public String testParam6(@PathVariable("username") String name){//将{username}路径匹配到的值赋给name参数
         System.out.println("username:"+name);
         return "register";
+    }
+
+    @PostMapping(value = "/user/register")
+    public String register(@RequestBody User user){
+        System.out.println("username:"+ user);
+        return "register";
+    }
+
+    //http://localhost:8080/mvc/user/1
+    @GetMapping(value = "/user/{id}")
+    @ResponseBody
+    public User register(@PathVariable Integer id){
+        System.out.println("id:"+id);
+        return userService.selectUserById(id);
     }
 }

@@ -62,13 +62,7 @@ MVC 架构程序的工作流程
 
 DispatcherServlet要做到这点,需要我们把所有的请求都发送到他那里
 
-**Spring核心组件**
-
-![mvc-context-hierarchy](../../%E6%9E%B6%E6%9E%84%E5%B8%88%E4%B9%8B%E8%B7%AF/%E8%B5%84%E6%96%99md/pic/mvc-context-hierarchy.png)
-
-
-
-**组件介绍**
+**Spring核心组件介绍**
 
 DispatcherServlet：作为前端控制器，整个流程控制的中心，控制其它组件执行，统一调度，降低组件之间的耦合性，提高每个组件的扩展性。
 
@@ -878,11 +872,13 @@ public class SessionController {
 #### 6.4 解决方案3
 
 > * mapping是访问路径，location是静态资源存放的路径
-> * 将/html/** 中 /**匹配到的内容，拼接到 /hhh/后
->   http://..../html/a.html  访问 /hhh/a.html
+> * 将/file/** 中 /**匹配到的内容，拼接到 /file/后
+>   http://..../file/a.html  访问 /file/a.html
+
+springmvc.xml配置
 
 ```xml
-<mvc:resources mapping="/html/**" location="/hhh/"/>
+<mvc:resources mapping="/file/**" location="/file/" />
 ```
 
 ### 七、Json处理
@@ -898,39 +894,76 @@ public class SessionController {
     <artifactId>jackson-databind</artifactId>
     <version>2.9.8</version>
 </dependency>
-//导入包的形式 :
-	jackson-core-2.10.4.jar
-	jackson-annotations-2.10.5.jar
-	jackson-databind-2.9.8.jar
 ```
 
 #### 7.2 使用@ResponseBody
 
 ```java
+package com.banyuan.study.controller;
+import java.util.Date;
+
+import com.banyuan.study.bean.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author poi 2021/5/31 22:42
+ * @version 1.0
+ * 2021/5/31 22:42
+ */
 @Controller
-public class JsonController{    
-	@RequestMapping("/test1")
+@RequestMapping("/json")
+public class JsonController{
+
+    //http://localhost:8080/mvc/json/getUser
+    @RequestMapping("/getUser")
     @ResponseBody //将handler的返回值，转换成json(jackson),并将json响应给客户端。
-    public User hello1(){
+    public User getUser(){
         System.out.println("hello world");
         User user = new User();
+        user.setId(0);
+        user.setName("张三");
+        user.setBirth(new Date());
+        user.setGender(false);
+
         return user;
     }
+
+    //http://localhost:8080/mvc/json/getUserList
     // @ResponseBody还可以用在handler的返回值上
-    @RequestMapping("/test2")
-    public @ResponseBody List<User> hello2(){
+    @RequestMapping("/getUserList")
+    @ResponseBody
+    public List<User> getUserList(){
         System.out.println("hello world");
-        List<User> users = Arrays.asList(new User(),new User());
+        User user = new User();
+        user.setId(0);
+        user.setName("张三");
+        user.setBirth(new Date());
+        user.setGender(false);
+
+        User user2 = new User();
+        user2.setId(2);
+        user2.setName("lisi");
+        user2.setBirth(new Date());
+        user2.setGender(false);
+        List<User> users = Arrays.asList(user,user2);
         return users;
     }
-    // 如果返回值已经是字符串，则不需要转json，直接将字符串响应给客户端 
-    @RequestMapping(value="/test3",produces = "text/html;charset=utf-8") //produces 防止中文乱码
-    @ResponseBody 
-    public String hello2(){
+
+    //http://localhost:8080/mvc/json/string
+    // 如果返回值已经是字符串，则不需要转json，直接将字符串响应给客户端
+    @RequestMapping(value="/string",produces = "text/html;charset=utf-8") //produces 防止中文乱码
+    @ResponseBody
+    public String string(){
         System.out.println("hello world");
         return "你好";
     }
 }
+
 ```
 
 #### 7.3 使用@RestController
@@ -940,18 +973,40 @@ public class JsonController{
 ```java
 @Controller
 @RestController
-public class JsonController{
-    @RequestMapping("/test1")
-    public User hello1(){
+@RequestMapping("/json2")
+public class Json2Controller{
+    //http://localhost:8080/mvc/json2/getUser
+    @RequestMapping("/getUser")
+    @ResponseBody //将handler的返回值，转换成json(jackson),并将json响应给客户端。
+    public User getUser(){
         System.out.println("hello world");
         User user = new User();
+        user.setId(0);
+        user.setName("张三");
+        user.setBirth(new Date());
+        user.setGender(false);
+
         return user;
     }
-    //@ResponseBody还可以用在handler的返回值上
-    @RequestMapping("/test2")
-    public List<User> hello2(){
+
+    //http://localhost:8080/mvc/json2/getUserList
+    // @ResponseBody还可以用在handler的返回值上
+    @RequestMapping("/getUserList")
+    @ResponseBody
+    public List<User> getUserList(){
         System.out.println("hello world");
-        List<User> users = Arrays.asList(new User(),new User());
+        User user = new User();
+        user.setId(0);
+        user.setName("张三");
+        user.setBirth(new Date());
+        user.setGender(false);
+
+        User user2 = new User();
+        user2.setId(2);
+        user2.setName("lisi");
+        user2.setBirth(new Date());
+        user2.setGender(false);
+        List<User> users = Arrays.asList(user,user2);
         return users;
     }
 }
@@ -1218,29 +1273,71 @@ public String xxx(){
 >
 > 此种方案，在集中管理异常方面，更有优势！
 
-```java
-public class MyExResolver implements HandlerExceptionResolver{
-	/**
-	 * 异常解析器：主体逻辑
-	 * 执行时刻：当handler中抛出异常时，会执行：捕获异常，并可以跳到错误页面
-	 */
-	@Override
-	public ModelAndView resolveException(HttpServletRequest request,
-			HttpServletResponse response, Object handler, Exception ex) {
-		ex.printStackTrace();//打印异常栈
-		//创建一个ModelAndView
-		ModelAndView mv = new ModelAndView();
-		//识别异常
-		if (ex instanceof Exception1) {
-			mv.setViewName("redirect:/xxx/error1");
-		}else if(ex instanceof Exception2){
-			mv.setViewName("redirect:/xxx/error2");
-		}else{
-			mv.setViewName("redirect:/xxx/error");
-		}
-		return mv;
-	}
+```
+package com.banyuan.study.exception;
+
+/**
+ * @author poi 2021/5/31 23:10
+ * @version 1.0
+ * 2021/5/31 23:10
+ */
+public class Exception1 extends Exception{
+    
+    
 }
+```
+
+```
+package com.banyuan.study.exception;
+
+/**
+ * @author poi 2021/5/31 23:10
+ * @version 1.0
+ * 2021/5/31 23:10
+ */
+public class Exception2 extends Exception{
+}
+```
+
+
+
+```java
+package com.banyuan.study.handler;
+
+import com.banyuan.study.exception.Exception1;
+import com.banyuan.study.exception.Exception2;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * @author poi 2021/5/31 23:08
+ * @version 1.0
+ * 2021/5/31 23:08
+ */
+public class MyExResolver implements HandlerExceptionResolver {
+    /**
+     * 异常解析器：主体逻辑
+     * 执行时刻：当handler中抛出异常时，会执行：捕获异常，并可以跳到错误页面
+     */
+    @Override
+    public ModelAndView resolveException(HttpServletRequest request,
+                                         HttpServletResponse response, Object handler, Exception ex) {
+        ex.printStackTrace();//打印异常栈
+        //创建一个ModelAndView
+        ModelAndView mv = new ModelAndView();
+        //识别异常
+        if (ex instanceof Exception1) {
+            mv.setViewName("redirect:/skip/toHomePage");
+        } else if (ex instanceof Exception2) {
+            mv.setViewName("redirect:redirect:/index.jsp");
+        }
+        return mv;
+    }
+}
+
 ```
 
 ```xml
@@ -1249,6 +1346,73 @@ public class MyExResolver implements HandlerExceptionResolver{
 ```
 
 
+
+controller
+
+```
+package com.banyuan.study.controller;
+
+import com.banyuan.study.bean.User;
+import com.banyuan.study.exception.Exception1;
+import com.banyuan.study.exception.Exception2;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @author poi 2021/5/31 22:42
+ * @version 1.0
+ * 2021/5/31 22:42
+ */
+@Controller
+@RequestMapping("/exception")
+public class ExceptionController {
+
+    //http://localhost:8080/mvc/exception/exception1
+    @RequestMapping("/exception1")
+    @ResponseBody
+    public User exception1() throws Exception1 {
+        System.out.println("hello world");
+
+        int i = 0;
+        if (i++ % 2 == 0){
+            throw new Exception1();
+        }
+        User user = new User();
+        user.setId(0);
+        user.setName("张三");
+        user.setBirth(new Date());
+        user.setGender(false);
+
+        return user;
+    }
+
+    //http://localhost:8080/mvc/exception/exception2
+    // @ResponseBody还可以用在handler的返回值上
+    @RequestMapping("/exception2")
+    @ResponseBody
+    public User exception2() throws Exception2 {
+        System.out.println("hello world");
+
+        int i = 0;
+        if (i++ % 2 == 0){
+            throw new Exception2();
+        }
+        User user = new User();
+        user.setId(0);
+        user.setName("张三");
+        user.setBirth(new Date());
+        user.setGender(false);
+
+        return user;
+    }
+
+}
+```
 
 ### 九、拦截器
 
@@ -1263,40 +1427,57 @@ public class MyExResolver implements HandlerExceptionResolver{
 > 执行顺序： preHandle--postHandle--afterCompletion
 
 ```java
-public class MyInter1 implements HandlerInterceptor{
-	//主要逻辑：在handler之前执行：抽取handler中的冗余代码
-	@Override
-	public boolean preHandle(HttpServletRequest request,
-			HttpServletResponse response, Object handler) throws Exception {
-		System.out.println("pre~~~");
+package com.banyuan.study.interceptor;
+
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * @author  poi 2021/5/31 23:56
+ * @version 1.0
+ * 2021/5/31 23:56
+ */
+public class MyInter1 implements HandlerInterceptor {
+    //主要逻辑：在handler之前执行：抽取handler中的冗余代码
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("pre~~~");
         /*
         response.sendRedirect("/springMVC_day2/index.jsp");//响应
         return false;//中断请求
         */
-		return true;//放行，后续的拦截器或handler就会执行
-	}
-	//在handler之后执行:进一步的响应定制
-	@Override
-	public void postHandle(HttpServletRequest request,
-			HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception {
-		System.out.println("post~~");
-	}
-	//在页面渲染完毕之后，执行：资源回收
-	@Override
-	public void afterCompletion(HttpServletRequest request,
-			HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
-		System.out.println("after~~");
-	}
+        return true;//放行，后续的拦截器或handler就会执行
+    }
+    //在handler之后执行:进一步的响应定制
+    @Override
+    public void postHandle(HttpServletRequest request,
+                           HttpServletResponse response, Object handler,
+                           ModelAndView modelAndView) throws Exception {
+        System.out.println("post~~");
+    }
+    //在页面渲染完毕之后，执行：资源回收
+    @Override
+    public void afterCompletion(HttpServletRequest request,
+                                HttpServletResponse response, Object handler, Exception ex)
+            throws Exception {
+        System.out.println("after~~");
+    }
 }
+
 ```
 
 #### 9.3 配置拦截路径
 
+springmvc.xml
+
 ```xml
 <mvc:interceptors>
     <mvc:interceptor>
+        <mvc:mapping path="/**"/>
         <mvc:mapping path="/inter/test1"/>
         <mvc:mapping path="/inter/test2"/>
         <mvc:mapping path="/inter/test*"/> <!-- test开头 -->
@@ -1338,11 +1519,11 @@ public class MyInter1 implements HandlerInterceptor{
 #### 10.2 表单
 
 ```html
-<form action="${pageContext.request.contextPath }/upload/test1" method="post" 
-      enctype="multipart/form-data">
-  file: <input type="file" name="source"/> <br>
-  <input type="submit" value="提交"/>
-</form>
+    <form action="${pageContext.request.contextPath }/file/upload" method="post"
+          enctype="multipart/form-data">
+        file: <input type="file" name="files"/> <br>
+        <input type="submit" value="提交"/>
+    </form>
 ```
 
 #### 10.3 上传解析器
@@ -1361,31 +1542,46 @@ public class MyInter1 implements HandlerInterceptor{
 #### 10.4 Handler
 
 ```java
-@RequestMapping("/test1")
-public String hello1(String username,MultipartFile source,HttpSession session) {
-    //文件的原始名称
-    String filename = source.getOriginalFilename();
-    //定制全局唯一的命名
-    String unique = UUID.randomUUID().toString();
-    //获得文件的后缀
-    String ext = FilenameUtils.getExtension(filename);//abc.txt   txt    hello.html  html
-    //定制全局唯一的文件名
-    String uniqueFileName = unique+"."+ext;
-    System.out.println("唯一的文件名:"+uniqueFileName);
+package com.banyuan.study.controller;
 
-    //文件的类型
-    String type = source.getContentType();
-    System.out.println("filename:"+filename+" type:"+type);
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
-    //获得 upload_file的磁盘路径 ==> 在webapp目录下创建一个目录"upload_file",且此目录初始不要为空，否则编译时被忽略
-    String real_path = session.getServletContext().getRealPath("/upload_file");
-    System.out.println("real_path:"+real_path);
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-    //将上传的文件，存入磁盘路径中
-    //source.transferTo(new File("d:/xxxx/xxxx/xx.jpg"))
-    source.transferTo(new File(real_path+"\\"+uniqueFileName));
-    return "index";
+/**
+ * @author poi 2021/6/1 20:22
+ * @version 1.0
+ * 2021/6/1 20:22
+ */
+@RequestMapping("/file")
+@Controller
+public class FileController {
+
+    @RequestMapping("upload")
+    @ResponseBody
+    public List<String> upload(MultipartFile[] files) throws IOException {
+List<String> result = new ArrayList<>();
+        for (MultipartFile file : files) {
+            //文件名
+            String fieldName = file.getName();
+            //文件的原始名称
+            String filename = file.getOriginalFilename();
+            String newName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(filename);
+            file.transferTo(new File("e:\\", newName));
+            result.add(newName);
+        }
+        return result;
+    }
 }
+
 ```
 
 
@@ -1397,28 +1593,24 @@ public String hello1(String username,MultipartFile source,HttpSession session) {
 #### 11.1 超链
 
 ```html
-<a href="${pageContext.request.contextPath}/download/test1?name=Koala.jpg">下载</a>
+<a href="${pageContext.request.contextPath}/file/download?name=Koala.jpg">下载</a>
 ```
 
 #### 11.2 Handler
 
 ```java
-@RequestMapping("/test1")
-public void hello1(String name,HttpSession session,HttpServletResponse response){
-    System.out.println("name:"+name);
-    //获得要下载文件的绝对路径
-    String path = session.getServletContext().getRealPath("/upload_file");
-    //文件的完整路径
-    String real_path = path+"\\"+name;
+    @RequestMapping("/download")
+    public void hello1(String name, HttpSession session, HttpServletResponse response) throws IOException {
+        System.out.println("name:"+name);
 
-    //设置响应头  告知浏览器，要以附件的形式保存内容   filename=浏览器显示的下载文件名
-    response.setHeader("content-disposition","attachment;filename="+name);
+        //设置响应头  告知浏览器，要以附件的形式保存内容   filename=浏览器显示的下载文件名
+        response.setHeader("content-disposition","attachment;filename="+name);
+        FileInputStream fileInputStream = new FileInputStream("e:\\" + name);
+        //读取目标文件，写出给客户端
+        IOUtils.copy(fileInputStream, response.getOutputStream());
 
-    //读取目标文件，写出给客户端
-    IOUtils.copy(new FileInputStream(real_path), response.getOutputStream());
-
-    //上一步，已经是响应了,所以此handler直接是void
-}
+        //上一步，已经是响应了,所以此handler直接是void
+    }
 ```
 
 
@@ -1543,12 +1735,48 @@ public void hello1(String name,HttpSession session,HttpServletResponse response)
 > @GetMapping("/users")
 
 ```java
-@RestController
+package com.banyuan.study.controller;
+
+import com.banyuan.study.bean.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @author poi 2021/6/1 20:58
+ * @version 1.0
+ * 2021/6/1 20:58
+ */
+@Controller
+@ResponseBody
+@RequestMapping("/rest")
 public class RestController {
     @GetMapping("/users")
     public List<User> queryAllUsers(){
         System.out.println("get");
-        List<User> users = ....
+        User user = new User();
+        user.setId(0);
+        user.setName("张三");
+        user.setBirth(new Date());
+        user.setGender(false);
+
+        User user2 = new User();
+        user2.setId(2);
+        user2.setName("lisi");
+        user2.setBirth(new Date());
+        user2.setGender(false);
+        List<User> users = Arrays.asList(user,user2);
         return users;
     }
 
@@ -1557,10 +1785,10 @@ public class RestController {
         System.out.println("Post user :"+user);
         return "{status:1}";
     }
-    
+
     @PutMapping("/users")
     public String updateUser(@RequestBody User user){
-        System.out.println("Put user" user:"+user);
+        System.out.println("Put user:" + user);
         return "{status:1}";
     }
 
@@ -1576,6 +1804,7 @@ public class RestController {
         return "{status:1}";
     }
 }
+
 ```
 
 ##### 13.3.2 Ajax请求
@@ -1623,6 +1852,34 @@ public class RestController {
     }
 </script>
 ```
+
+from表单只有post，get方法，如果需要其他方式，可以如下操作
+
+```jsp
+<%--<form action="../goods/1" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_method" value="put">
+    <input type="hidden" name="id" value="1">
+    <input name="goodsName" value="">
+    <input type="submit">
+</form>
+```
+
+web.xml
+
+```xml
+    <filter>
+        <filter-name>methodFilter</filter-name>
+        <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>methodFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+```
+
+
+
+
 
 ### 十四、跨域请求
 
@@ -1702,19 +1959,148 @@ xhr.withCredentials=true;
 > * 整合过程，就是累加：代码+依赖+配置。然后将service注入给controller即可
 >
 
+添加依赖
+
+```
+    <!--MyBatis核心依赖-->
+    <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis</artifactId>
+        <version>3.4.6</version>
+    </dependency>
+
+    <!--MySql驱动依赖-->
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>5.1.47</version>
+    </dependency>
+
+
+    <!--test依赖-->
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+        <scope>test</scope>
+    </dependency>
+
+    <!-- log4j日志依赖 https://mvnrepository.com/artifact/log4j/log4j -->
+    <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.17</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>druid</artifactId>
+        <version>1.1.16</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.github.pagehelper</groupId>
+        <artifactId>pagehelper</artifactId>
+        <version>5.2.0</version>
+    </dependency>
+</dependencies>
+```
+
+复制配置文件
+
+UserService
+
+```jsp
+package com.banyuan.study.service;
+
+import com.banyuan.study.bean.Department;
+import com.banyuan.study.bean.User;
+import com.banyuan.study.dao.DepartmentDao;
+import com.banyuan.study.dao.UserDao;
+import com.banyuan.study.util.MybatisUtil;
+
+import java.util.List;
+
+/**
+ * @author poi 2021/6/1 22:00
+ * @version 1.0
+ * 2021/6/1 22:00
+ */
+public class UserService {
+
+    public User selectUserById(Integer id) {
+        try {
+            UserDao dao = MybatisUtil.getMapper(UserDao.class);
+
+            User user = dao.selectUserById(id);
+            return user;
+        } catch (Exception e) {
+            MybatisUtil.rollback();
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+}
+
+
+```
+
+UserController
+
+```
+package com.banyuan.study.controller;
+
+import com.banyuan.study.bean.User;
+import com.banyuan.study.bean.UserList;
+import com.banyuan.study.service.UserService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import sun.rmi.runtime.NewThreadAction;
+
+import javax.lang.model.element.VariableElement;
+import java.util.Date;
+
+/**
+ * @author poi 2021/5/30 9:26
+ * @version 1.0
+ * 2021/5/30 9:26
+ */
+@Controller
+public class UserController {
+    private UserService userService = new UserService();
+
+    //http://localhost:8080/mvc/user/1
+    @GetMapping(value = "/user/{id}")
+    @ResponseBody
+    public User register(@PathVariable Integer id){
+        System.out.println("id:"+id);
+        return userService.selectUserById(id);
+    }
+}
+```
+
 #### 16.2 整合技巧
 
 > 两个工厂不能有彼此侵入，即，生产的组件不能有重合。
 
 ```xml
-<!-- 告知SpringMVC  哪些包中 存在 被注解的类
+    <!--第一步 扫描类-->
+    <!-- 告知SpringMVC  哪些包中 存在 被注解的类
 	use-default-filters=true 凡是被 @Controller @Service  @Repository注解的类，都会被扫描
 	use-default-filters=false 默认不扫描包内的任何类, 只扫描include-filter中指定的类
 	只扫描被@Controller注解的类
 -->
-<context:component-scan base-package="com.zhj" use-default-filters="false">
- 	<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-</context:component-scan>
+    <context:component-scan base-package="com.banyuan.study.controller" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
 ```
 
 ```xml
